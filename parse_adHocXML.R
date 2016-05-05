@@ -5,6 +5,7 @@ extract_dateAndISIN = function (message) {
   for (f in fields) {
     if (xml_attrs(f) == "dtcreated") {
       date = xml_text((f))
+      # date = strptime(date, "%Y-%m-%d %H:%M:%S")
     } else if (xml_attrs(f) == "isin") {
       isin = xml_text((f))
     }
@@ -101,18 +102,22 @@ files = c("data/DGAP_Ad-hoc/DGAP_Ad-hoc_02-04.xml",
           "data/DGAP_Ad-hoc/DGAP_Ad-hoc_Apr11_Jun11.xml",
           "data/DGAP_Ad-hoc/DGAP_Ad-hoc_Sep10_Apr11.xml")
 
-rows = xml_children(read_xml(files[6]))
+rows = xml_children(read_xml(files[5]))
 
 events = c()
-for (x in rows) {
-  e = extract_dateAndISIN(x)
+pb <- txtProgressBar(min=1, max = length(rows), style = 3)
+for (i in 1:length(rows)) {
+  setTxtProgressBar(pb, i)
+  e = extract_dateAndISIN(rows[i])
   events = rbind(events, e)
-  remove(e, x)
+  remove(e)
 }
+remove(rows, i, pb)
 
-ev = data.frame(events)
+ev = unique(data.frame(events))
 
 # sort stuff
 library(dplyr)
 ev = arrange(ev, isin, date)
-print(ev)
+
+isin_set = as.character(unique(ev[,2]))

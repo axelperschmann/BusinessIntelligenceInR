@@ -1,0 +1,32 @@
+PRESENTATION
+
+Give a general introduction how to utilize Hadoop from within the statistical software "R".
+
+PAPER
+
+Give an introduction how to utilize Hadoop from within the statistical software "R". In addition, show how to use the capabilities in R by stating the exact function calls. Use appropriate examples for illustration.
+
+In addition, test this with the following datasets. Wir haben exklusiven Zugang von der Deutschen Börse zu deren Tick-Daten (200+ GB), d.h. für jede 100ste Millisekunden stehen dort die einzelnen Transaktionen. Außerdem haben wir für alle Ad-Hoc-Meldunge die Uhrzeiten. Wir würden nun gern die Preise nach Erscheinen der Nachricht herausfinden. In der Sekunde nach dem Erscheinen, in den ersten 5, 10, 30, 60 Sekunden sowie 5 Minuten, 10 Minuten und 1 Stunde. Damit bitten wir dich zu prüfen, wie schnell automated trader auf einer Nachricht handeln.
+
+Auf die Nachrichten und deren Uhrzeiten kannst du hier zugreifen (Achtung: der Download-Link ist nur 10 Tage gültig!)
+https://gigamove.rz.rwth-aachen.de/d/id/hf2Nkptiyf2CWn
+Die Isin-Nummer kannst leicht mittels Regular Expression extrahieren und damit eine Nachricht einem Unternehmen zuordnen.
+
+Was so leicht klingt, hat aber einen Haken: die Tick-Daten der Börse sind nicht sortiert und haben Lücken. D.h. für manche nicht-liquiden Aktien gibt es nur eine Transaktion oder aber auch mehrere an einem Tag. Das Format macht es also nicht so leicht. Du kannst dir eine Datei hier ansehen (Achtung: der Download-Link ist nur 10 Tage gültig!):
+https://gigamove.rz.rwth-aachen.de/d/id/HtCoBcDYHDvFgB
+
+Insgesamt gibt es davon 166 Dateien. Wir würden dir nach der ersten Test-Zeit später eine Hadoop-Installation von uns zur Verfügung stellen, damit wir das für alle Dateien berechnen können.
+
+RESOURCES
+
+As a starting point for your literature research, checkout the following introductory references.
+
+https://github.com/RevolutionAnalytics/RHadoop/wiki
+http://bighadoop.wordpress.com/2013/02/25/r-and-hadoop-data-analysis-rhadoop/
+http://strataconf.com/stratany2013/public/schedule/detail/30632
+http://blog.revolutionanalytics.com/2011/09/mapreduce-hadoop-r.html
+http://www.revolutionanalytics.com/sites/default/files/using-r-with-hadoop.pdf
+https://domino.mpi-inf.mpg.de/intranet/ag5/ag5publ.nsf/0/572ae05f218b371ac125784d0043d41f/$FILE/sigmod696-sudipto.pdf
+http://cran.r-project.org/web/packages/HadoopStreaming/
+
+Please note that you are asked to find additional resources both on the Internet (i.e. scientific papers, manuals, tutorials) and in the library. 

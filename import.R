@@ -11,7 +11,8 @@ mydata_filtered = mydata[mydata$BID_ASK_FLAG == "B",]
 mydata_filtered = mydata_filtered[mydata_filtered$PRICE != 0.0,]
 
 pb <- txtProgressBar(min=1, max = length(isin_set), style = 3)
-for (i in 15:length(isin_set)) {
+diff_set = c()
+for (i in 1:length(isin_set)) {
   setTxtProgressBar(pb, i)
   is = isin_set[i]
   timeline = subset(mydata_filtered, ISIN==is)
@@ -45,7 +46,8 @@ for (i in 15:length(isin_set)) {
   
   # plot only if at least one adHoc_date is within the range of our timeline
   if (length(dates_in_range) > 0) {
-    jpeg(paste("plots/", is,  "rplot.jpg", sep=""))
+    print(is)
+    jpeg(paste("plots/", is,  "_0_timeline.jpg", sep=""))
     description = paste(ts_first, " - ", ts_last, " (", ts_last-ts_first, ")", sep="")
     
     price = timeline[["PRICE"]]
@@ -53,53 +55,91 @@ for (i in 15:length(isin_set)) {
          ylab="BID price", xlab="time")
     points(ts, price)
     
+    for (t in 1:length(dates_in_range)) {
+      # necessary to finish plot
+      msg_ts = dates_in_range[t]
+      abline(v=msg_ts, col="purple")
+      abline(v=msg_ts+60*60, col="purple", lty=3)
+    }
+    dev.off()
+    
+    
     # mark adHoc date as a vertical line
     for (t in 1:length(dates_in_range)) {
-      abline(v=dates_in_range[t], col="purple")
+      jpeg(paste("plots/", is,  "_", t, "_relative.jpg", sep=""))
+      msg_ts = dates_in_range[t]
+      
+      # evaluate price change at future timestamps:
+      # 1, 5, 10, 30, 60 Sekunden sowie 5 Minuten, 10 Minuten und 1 Stunde
+      future_timestamps = rep(msg_ts, 9) + c(0, 1, 5, 10, 30, 60, 60*5, 60*10, 60*60)
+      
+      i = 1
+      indices = c()
+      for (j in 1:length(future_timestamps)) {
+        
+        while (!is.na(ts[i]) && ts[i] < future_timestamps[j]) {
+          i = i + 1
+        }
+        indices = c(indices, i-1)
+      }
+      
+      diffs = c()
+      for (j in indices) {
+        diff = ((price[j] / price[indices[1]]) - 1) * 100
+        print(paste(price[j], " (", diff, "% )"))
+        diffs = c(diffs, diff)
+        
+      }
+      diff_set = rbind(diff_set, diffs)
+      
+      barplot(diffs, future_timestamps, names.arg=c("adHoc", "+1s", "+5s", "+10s", "+30s", "+1m", "+5m", "+10m", "+1h"),
+              ylab="BID price change in %", main = paste("ISIN:",is),
+              sub=paste("adHocMessage from:", as.POSIXlt(msg_ts, origin = "1970-01-01")))
+      
+      dev.off()
     }
     
-    dev.off()
   }
 }
 
 
-events[1:5,2]
-adHoc_dates = subset(ev, isin=="DE0007300402")
-print(adHoc_dates)
-timeline = subset(mydata, ISIN=="DE0007300402")
-if (nrow(timeline) == 0) {
-  stop('isin not found in dataset')
-}
-
-# sort stuff
-library(dplyr)
-timeline = arrange(data.frame(timeline), TIMESTAMP, HSEC)
-
-# get rid of annoying '0.0' values
-timeline = timeline[timeline$PRICE != 0,]
-
-# extract date, time and fractional seconds
-ts = paste(timeline[["TIMESTAMP"]], ".", timeline[["HSEC"]], sep="")
-ts = strptime(ts, "%Y-%m-%d %H:%M:%OS")
-# print first and last timestamp
-print(paste(head(ts, n=1), "-", tail(ts, n=1)))
-
-price = timeline[["PRICE"]]
-
-# plot timeline
-plot(ts, price, type="l")
-abline(v=as.numeric(ts[10]), col="purple")
-
-for (t in adHoc_dates[1]) {
-  print(t)
-  print(as.numeric(t))
-  abline(v=as.numeric(t), col="purple")
-}
-
-
-for (i in 1:26) {
-  print(ts[i])
-}
-print(adHoc_dates)
+# events[1:5,2]
+# adHoc_dates = subset(ev, isin=="DE0007300402")
+# print(adHoc_dates)
+# timeline = subset(mydata, ISIN=="DE0007300402")
+# if (nrow(timeline) == 0) {
+#   stop('isin not found in dataset')
+# }
+# 
+# # sort stuff
+# library(dplyr)
+# timeline = arrange(data.frame(timeline), TIMESTAMP, HSEC)
+# 
+# # get rid of annoying '0.0' values
+# timeline = timeline[timeline$PRICE != 0,]
+# 
+# # extract date, time and fractional seconds
+# ts = paste(timeline[["TIMESTAMP"]], ".", timeline[["HSEC"]], sep="")
+# ts = strptime(ts, "%Y-%m-%d %H:%M:%OS")
+# # print first and last timestamp
+# print(paste(head(ts, n=1), "-", tail(ts, n=1)))
+# 
+# price = timeline[["PRICE"]]
+# 
+# # plot timeline
+# plot(ts, price, type="l")
+# abline(v=as.numeric(ts[10]), col="purple")
+# 
+# for (t in adHoc_dates[1]) {
+#   print(t)
+#   print(as.numeric(t))
+#   abline(v=as.numeric(t), col="purple")
+# }
+# 
+# 
+# for (i in 1:26) {
+#   print(ts[i])
+# }
+# print(adHoc_dates)
 
 

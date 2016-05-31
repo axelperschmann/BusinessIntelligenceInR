@@ -35,21 +35,25 @@ extract_dateAndISIN = function (message) {
   
   # regular expression of ISIN:
   # expr = "[a-zA-Z]{2}[ ]?[a-zA-Z0-9]{9}[0-9]{1}"
+  # (IN|DE|US)(\s?)([0-9A-Z]{9}[0-9]?)(?![0-9]{1})
+  
+  # (XS|AD|AE|AF|AG|AI|AL|AM|AO|AQ|AR|AS|AT|AU|AW|AX|AZ|BA|BB|BD|BE|BF|BG|BH|BI|BJ|BL|BM|BN|BO|BQ|BR|BS|BT|BV|BW|BY|BZ|CA|CC|CD|CF|CG|CH|CI|CK|CL|CM|CN|CO|CR|CU|CV|CW|CX|CY|CZ|DE|DJ|DK|DM|DO|DZ|EC|EE|EG|EH|ER|ES|ET|FI|FJ|FK|FM|FO|FR|GA|GB|GD|GE|GF|GG|GH|GI|GL|GM|GN|GP|GQ|GR|GS|GT|GU|GW|GY|HK|HM|HN|HR|HT|HU|ID|IE|IL|IM|IN|IO|IQ|IR|IS|IT|JE|JM|JO|JP|KE|KG|KH|KI|KM|KN|KP|KR|KW|KY|KZ|LA|LB|LC|LI|LK|LR|LS|LT|LU|LV|LY|MA|MC|MD|ME|MF|MG|MH|MK|ML|MM|MN|MO|MP|MQ|MR|MS|MT|MU|MV|MW|MX|MY|MZ|NA|NC|NE|NF|NG|NI|NL|NO|NP|NR|NU|NZ|OM|PA|PE|PF|PG|PH|PK|PL|PM|PN|PR|PS|PT|PW|PY|QA|RE|RO|RS|RU|RW|SA|SB|SC|SD|SE|SG|SH|SI|SJ|SK|SL|SM|SN|SO|SR|SS|ST|SV|SX|SY|SZ|TC|TD|TF|TG|TH|TJ|TK|TL|TM|TN|TO|TR|TT|TV|TW|TZ|UA|UG|UM|US|UY|UZ|VA|VC|VE|VG|VI|VN|VU|WF|WS|YE|YT|ZA|ZM|ZW)([\s]?)(?=.{0,8}[0-9]+)([0-9A-Z]{9}[0-9]?)(?![0-9]{1})
   expr = paste("(XS|AD|AE|AF|AG|AI|AL|AM|AO|AQ|AR|AS|AT|AU|AW|AX|AZ|BA|BB|BD|",
                "BE|BF|BG|BH|BI|BJ|BL|BM|BN|BO|BQ|BR|BS|BT|BV|BW|BY|BZ|CA|CC|",
                "CD|CF|CG|CH|CI|CK|CL|CM|CN|CO|CR|CU|CV|CW|CX|CY|CZ|DE|DJ|DK|",
                "DM|DO|DZ|EC|EE|EG|EH|ER|ES|ET|FI|FJ|FK|FM|FO|FR|GA|GB|GD|GE|",
                "GF|GG|GH|GI|GL|GM|GN|GP|GQ|GR|GS|GT|GU|GW|GY|HK|HM|HN|HR|HT|",
-               "HU|ID|IE|IL|IM|IN|IO|IQ|IR|IS|IT|JE|JM|JO|JP|KE|KG|KH|KI|KM|",
+               "HU|ID|IE|IL|IM|^IN|IO|IQ|IR|IS|IT|JE|JM|JO|JP|KE|KG|KH|KI|KM|",
                "KN|KP|KR|KW|KY|KZ|LA|LB|LC|LI|LK|LR|LS|LT|LU|LV|LY|MA|MC|MD|",
                "ME|MF|MG|MH|MK|ML|MM|MN|MO|MP|MQ|MR|MS|MT|MU|MV|MW|MX|MY|MZ|",
                "NA|NC|NE|NF|NG|NI|NL|NO|NP|NR|NU|NZ|OM|PA|PE|PF|PG|PH|PK|PL|",
                "PM|PN|PR|PS|PT|PW|PY|QA|RE|RO|RS|RU|RW|SA|SB|SC|SD|SE|SG|SH|",
                "SI|SJ|SK|SL|SM|SN|SO|SR|SS|ST|SV|SX|SY|SZ|TC|TD|TF|TG|TH|TJ|",
                "TK|TL|TM|TN|TO|TR|TT|TV|TW|TZ|UA|UG|UM|US|UY|UZ|VA|VC|VE|VG|",
-               "VI|VN|VU|WF|WS|YE|YT|ZA|ZM|ZW)",
-               "([0-9A-Z]{9})",
-               "([0-9]{1})")
+               "VI|VN|VU|WF|WS|XF|YE|YT|ZA|ZM|ZW)([\\s]?)",
+               "(?=.{0,8}[0-9]+)([0-9A-Z]{9}[0-9]?)",
+               "(?![0-9]{1})",
+               sep="")
   # 2 characters:   country
   # 9 alphanumeric: NSIN
   # 1 number:       checksum
@@ -57,13 +61,13 @@ extract_dateAndISIN = function (message) {
   
   # extrakt ISIN
   # check for ISIN in field 'body'
-  isin_idx = regexpr(expr, body)
+  isin_idx = regexpr(expr, body, perl = TRUE)
   if (isin_idx > 0)  {
     isin = regmatches(body, isin_idx)
   }
   else {
     # check for ISIN in field 'headline'
-    isin_idx = regexpr(expr, headline)
+    isin_idx = regexpr(expr, headline, perl = TRUE)
     if (isin_idx > 0) {
       isin = regmatches(headline, isin_idx)
     }
@@ -74,7 +78,14 @@ extract_dateAndISIN = function (message) {
       print("Could not extract ISIN:")
       print(date)
       print(headline)
-
+      print(body)
+      isin_idx = regexpr(expr, body, perl = TRUE)
+      print(isin_idx)
+      print(expr)
+      
+      if (date == "2005-10-12 16:52:41") {
+        stop("debug")
+      }
 
       return(NULL)
       
@@ -90,6 +101,10 @@ extract_dateAndISIN = function (message) {
     }
   }
   
+  # remove newline characters. They seldomly appear in an adHoc Message ...
+  isin = gsub("[\r\n]", "", isin)
+  isin = gsub(" ", "", isin)
+  
   return(cbind(date, isin))
 }
 
@@ -102,17 +117,19 @@ files = c("data/DGAP_Ad-hoc/DGAP_Ad-hoc_02-04.xml",
           "data/DGAP_Ad-hoc/DGAP_Ad-hoc_Apr11_Jun11.xml",
           "data/DGAP_Ad-hoc/DGAP_Ad-hoc_Sep10_Apr11.xml")
 
-rows = xml_children(read_xml(files[5]))
-
 events = c()
-pb <- txtProgressBar(min=1, max = length(rows), style = 3)
-for (i in 1:length(rows)) {
-  setTxtProgressBar(pb, i)
-  e = extract_dateAndISIN(rows[i])
-  events = rbind(events, e)
-  remove(e)
+for (f in files) {
+  rows = xml_children(read_xml(f))
+  
+  pb <- txtProgressBar(min=1, max = length(rows), style = 3)
+  for (i in 1:length(rows)) {
+    setTxtProgressBar(pb, i)
+    e = extract_dateAndISIN(rows[i])
+    events = rbind(events, e)
+    remove(e)
+  }
+  remove(rows, i, pb)
 }
-remove(rows, i, pb)
 
 ev = unique(data.frame(events))
 
@@ -120,4 +137,5 @@ ev = unique(data.frame(events))
 library(dplyr)
 ev = arrange(ev, isin, date)
 
-isin_set = as.character(unique(ev[,2]))
+write.csv(ev, file = "events.csv", row.names=FALSE)
+rm(list = ls())

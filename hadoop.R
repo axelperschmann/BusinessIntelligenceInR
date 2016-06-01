@@ -2,16 +2,12 @@ library(rmr2)
 rmr.options(backend="local")
 #  Seconds include HSEC
 options(digits.secs=2)
-
+t0 = proc.time()
 # load isin_set
 ev = read.csv("events.csv", sep = ",", as.is=TRUE, col.names=c("date", "ISIN"))
 isin.list = as.character(unique(ev[,2]))
 
 ### READ TICKS
-col.names=c("WKN", "ISIN", "INSTRUMENT_NAME", "TIMESTAMP", "HSEC", "PRICE", "UNITS", "BID_ASK_FLAG")
-inputformat <- make.input.format("csv", sep = ";", col.names=col.names, colClasses=c(rep("character",4), "integer", "double", "integer", "character")) 
-important.cols = c("ISIN", "TIMESTAMP", "PRICE", "BID_ASK_FLAG", "useful", "count")
-
 map.ticks <- function(k, v) {
   v = v[v$BID_ASK_FLAG == "A",]
   v = v[v$PRICE != 0.0, ]
@@ -67,14 +63,25 @@ red.ticks <- function(k, v) {
 }
 
 #debug(red.ticks)
+col.names   = c("WKN", "ISIN", "INSTRUMENT_NAME", "TIMESTAMP", "HSEC", "PRICE", "UNITS", "BID_ASK_FLAG")
+col.classes = c(rep("character",4), "integer", "double", "integer", "character")
+inputformat <- make.input.format("csv", sep = ";",
+                                 col.names=col.names,
+                                 colClasses=col.classes) 
+important.cols = c("ISIN", "TIMESTAMP", "PRICE", "BID_ASK_FLAG", "useful", "count")
+
+t1 = proc.time()
 data <- mapreduce(input="data/1017_01_M_08_E_20090331/monthly_bba_aa_20090331_small.csv",
                   input.format=inputformat,
                   map = map.ticks
                   ,reduce = red.ticks
                  )
 
+t2 = proc.time()
 data.df <- from.dfs(data)
-# View(data.df)
+View(data.df)
+
+write.csv(data.df, "x.csv")
 
 tick.delta = data.df$val - 1.0
 tick.isin = data.df$key[, 1]
@@ -99,7 +106,18 @@ barplot(colSums(tick.delta != 0.) / adhoc.count, 1:length(offset.names), names.a
         sub=paste("mean over", adhoc.count, "adhoc messages"), ylim=c(0,1))
 dev.off()
 
-# again, debug
-barplot(colSums(tick.delta != 0.) / adhoc.count, 1:length(offset.names), names.arg=offset.names,
-        ylab="% of stocks that show activity after an adHocMessage", main = "Trade activity after published adHoc message",
-        sub=paste("mean over", adhoc.count, "adhoc messages"), ylim=c(0,1))
+t3 = proc.time()
+
+print("adHocs")
+print(t1-t0)
+print("mapReduce")
+print(t2-t1)
+print("plots:")
+print(t3-t2)
+print("total:")
+print(t3-t0)
+
+# # again, debug
+# barplot(colSums(tick.delta != 0.) / adhoc.count, 1:length(offset.names), names.arg=offset.names,
+#         ylab="% of stocks that show activity after an adHocMessage", main = "Trade activity after published adHoc message",
+#         sub=paste("mean over", adhoc.count, "adhoc messages"), ylim=c(0,1))

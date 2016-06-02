@@ -2,86 +2,97 @@ library(rmr2)
 rmr.options(backend="local")
 #  Seconds include HSEC
 options(digits.secs=2)
-t0 = proc.time()
 # load isin_set
 ev = read.csv("events.csv", sep = ",", as.is=TRUE, col.names=c("date", "ISIN"))
 isin.list = as.character(unique(ev[,2]))
 
 ### READ TICKS
 map.ticks <- function(k, v) {
-  v = v[v$BID_ASK_FLAG == "A",]
-  v = v[v$PRICE != 0.0, ]
+  # Skip header lines
+  v = v[v$PRICE != "PRICE",]
   
-  # ts = paste(v[["TIMESTAMP"]], ".", v[["HSEC"]], sep="")
-  value = cbind(v, useful=v$ISIN %in% isin.list, count=1)
+  # type conversion to double only necessary for v$PRICE, because we do not need v$HSEC and v$UNITS
+  v$PRICE = as.double(v$PRICE)
   
-  # only extract ISIN's when we have observed an AdHoc msg.
+  # filter input
+  # v = v[v$BID_ASK_FLAG == 'A', ]
+  v = v[v$PRICE != 0.0, ] # erroneous values in data?!
+  
+  value = cbind(v, useful=v$ISIN %in% isin.list)
+  
+  # only extract ISIN's when we have observed an AdHoc msg
   value = value[value$useful == TRUE,]
   
-  keyval(key=value$ISIN,
-         val=subset(value, select=important.cols))
+  keyval(key=paste(value$ISIN, value$BID_ASK_FLAG, sep="_"),
+         val=subset(value, select=c("TIMESTAMP", "PRICE")))
 }
 
 red.ticks <- function(k, v) {
-    v$TIMESTAMP = as.POSIXct(v$TIMESTAMP, "%Y-%m-%d %H:%M:%OS", tz="CET")
-    v = v[order(v$TIMESTAMP),]
+  v$TIMESTAMP = as.POSIXct(v$TIMESTAMP, "%Y-%m-%d %H:%M:%OS", tz="CET")
+  v = v[order(v$TIMESTAMP),]
+  
+  adhocs = ev[ev$ISIN == unlist(strsplit(k, "_"))[1], 1]
+  adhocs = as.POSIXct(adhocs, "%Y-%m-%d %H:%M:%OS", tz="CET")
+  adhocs = adhocs[!is.na(adhocs)]
+  
+  # only keep adhoc dates which lay in the interval of available tick data
+  adhocs.relevant = adhocs[adhocs > v$TIMESTAMP[1]]
+  adhocs.relevant = adhocs.relevant[adhocs.relevant < tail(v$TIMESTAMP, n=1)]
+  
+  if (length(adhocs.relevant) > 0) {
+    # do magic stuff
+    l = length(adhocs.relevant)
+    offset.seconds = c(0, 1, 5, 10, 30, 60, 60*5, 60*10, 60*60)
+    timestamps = matrix(rep(adhocs.relevant,length(offset.seconds)), nrow=l)
+    offset = matrix(rep(offset.seconds, l), byrow=TRUE, nrow=l)
+    timestamps.future = timestamps + offset
     
-    adhocs = ev[ev$ISIN == k, 1]
-    adhocs = as.POSIXct(adhocs, "%Y-%m-%d %H:%M:%OS", tz="CET")
-    adhocs = adhocs[!is.na(adhocs)]
+    fun = stepfun(v$TIMESTAMP, c(v$PRICE, tail(v$PRICE, n=1)), f=1, right=TRUE)
     
-    # only keep adhoc dates which lay in the interval of available tick data
-    adhocs.relevant = adhocs[adhocs > v$TIMESTAMP[1]]
-    adhocs.relevant = adhocs.relevant[adhocs.relevant < tail(v$TIMESTAMP, n=1)]
-    
-    if (length(adhocs.relevant) > 0) {
-      # do magic stuff
-      l = length(adhocs.relevant)
-      offset.seconds = c(0, 1, 5, 10, 30, 60, 60*5, 60*10, 60*60)
-      timestamps = matrix(rep(adhocs.relevant,length(offset.seconds)), nrow=l)
-      offset = matrix(rep(offset.seconds, l), byrow=TRUE, nrow=l)
-      timestamps.future = timestamps + offset
-      
-      fun = stepfun(v$TIMESTAMP, c(v$PRICE, tail(v$PRICE, n=1)), f=1, right=TRUE)
-      
-      # collect corresponding PRICE for each TIMESTAMP
-      result = c()
-      for (i in 1:l) {
-        x = fun(timestamps.future[i,])
-        result = rbind(result, x)
-      }
-      colnames(result) = paste("+", offset.seconds, "s", sep="")
-      
-      # calculate PRICE delta over time
-      delta = result / result[,1]
-      colnames(delta) = paste("s", offset.seconds, sep="")
-      rownames(delta) = make.names(adhocs.relevant, unique=TRUE)
-
-      keyval(key=cbind(isin=k, date=as.character(adhocs.relevant)), 
-             val=delta)
+    # collect corresponding PRICE for each TIMESTAMP
+    result = c()
+    for (i in 1:l) {
+      x = fun(timestamps.future[i,])
+      result = rbind(result, x)
     }
+    colnames(result) = paste("+", offset.seconds, "s", sep="")
+    
+    # calculate PRICE delta over time
+    delta = result / result[,1]
+    colnames(delta) = paste("s", offset.seconds, sep="")
+    rownames(delta) = make.names(adhocs.relevant, unique=TRUE)
+    
+    keyval(key=cbind(isin=k, date=as.character(adhocs.relevant)), 
+           val=delta)
+  }
 }
 
-#debug(red.ticks)
 col.names   = c("WKN", "ISIN", "INSTRUMENT_NAME", "TIMESTAMP", "HSEC", "PRICE", "UNITS", "BID_ASK_FLAG")
 col.classes = c(rep("character",4), "integer", "double", "integer", "character")
 inputformat <- make.input.format("csv", sep = ";",
                                  col.names=col.names,
-                                 colClasses=col.classes) 
-important.cols = c("ISIN", "TIMESTAMP", "PRICE", "BID_ASK_FLAG", "useful", "count")
+                                 stringsAsFactors = FALSE)
+
+# input.path = "data/ticks_subsets/" # for debugging, small data set only
+input.path = "data/1017_01_M_08_E_20090331/"
+input.files = paste(input.path, list.files(path = input.path), sep="")
 
 t1 = proc.time()
-data <- mapreduce(input="data/1017_01_M_08_E_20090331/monthly_bba_aa_20090331_small.csv",
+data <- mapreduce(input=input.files,
                   input.format=inputformat,
                   map = map.ticks
                   ,reduce = red.ticks
-                 )
+)
 
-t2 = proc.time()
+
 data.df <- from.dfs(data)
 View(data.df)
+t2 = proc.time()
 
-write.csv(data.df, "x.csv")
+print("time diff")
+print(t2-t1)
+
+write.csv(data.df, "output.csv")
 
 tick.delta = data.df$val - 1.0
 tick.isin = data.df$key[, 1]
@@ -101,21 +112,10 @@ for (i in 1:length(data.df$key)) {
 adhoc.count = dim(data.df$key)[1]
 
 jpeg("plots/summary.jpeg")
-barplot(colSums(tick.delta != 0.) / adhoc.count, 1:length(offset.names), names.arg=offset.names,
+barplot(colSums(tick.delta != 0.) / adhoc.count * 100, 1:length(offset.names), names.arg=offset.names,
         ylab="% of stocks that show activity after an adHocMessage", main = "Trade activity after published adHoc message",
-        sub=paste("mean over", adhoc.count, "adhoc messages"), ylim=c(0,1))
+        sub=paste("mean over", adhoc.count, "adhoc messages"), ylim=c(0,100))
 dev.off()
-
-t3 = proc.time()
-
-print("adHocs")
-print(t1-t0)
-print("mapReduce")
-print(t2-t1)
-print("plots:")
-print(t3-t2)
-print("total:")
-print(t3-t0)
 
 # # again, debug
 # barplot(colSums(tick.delta != 0.) / adhoc.count, 1:length(offset.names), names.arg=offset.names,

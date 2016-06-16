@@ -13,6 +13,7 @@
 
 # RStudio files
 .Rproj.user/
+BusinessIntelligence.Rproj
 
 # produced vignettes
 vignettes/*.html

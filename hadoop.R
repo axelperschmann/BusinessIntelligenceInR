@@ -1,9 +1,14 @@
+Sys.setenv(HADOOP_CMD="/usr/local/hadoop/bin/hadoop")
+Sys.setenv(HADOOP_STREAMING="/usr/local/hadoop/share/hadoop/tools/lib/hadoop-streaming-2.4.1.jar")
+options(stringsAsFactors = FALSE) 
+library(rhdfs)
+hdfs.init()
+
 library(rmr2)
-rmr.options(backend="local")
-#  Seconds include HSEC
-options(digits.secs=2)
+
 # load isin_set
-ev = read.csv("events.csv", sep = ",", as.is=TRUE, col.names=c("date", "ISIN"))
+setwd("/home/isresearch")
+ev = read.csv("AxelPerschmann/events.csv", sep = ",", as.is=TRUE, col.names=c("date", "ISIN"))
 isin.list = as.character(unique(ev[,2]))
 
 ### READ TICKS
@@ -11,16 +16,15 @@ map.ticks <- function(k, v) {
   # Skip header lines
   v = v[v$PRICE != "PRICE",]
   
-  # type conversion to double only necessary for v$PRICE, because we do not need v$HSEC and v$UNITS
-  v$PRICE = as.double(v$PRICE)
-  
   # filter input
   # v = v[v$BID_ASK_FLAG == 'A', ]
+  
+  # type conversion to double only necessary for v$PRICE, because we do n ot need v$HSEC and v$UNITS
+  v$PRICE = as.double(v$PRICE)
   v = v[v$PRICE != 0.0, ] # erroneous values in data?!
   
-  value = cbind(v, useful=v$ISIN %in% isin.list)
-  
   # only extract ISIN's when we have observed an AdHoc msg
+  value = cbind(v, useful=v$ISIN %in% isin.list)
   value = value[value$useful == TRUE,]
   
   keyval(key=paste(value$ISIN, value$BID_ASK_FLAG, sep="_"),
@@ -67,57 +71,55 @@ red.ticks <- function(k, v) {
   }
 }
 
-col.names   = c("WKN", "ISIN", "INSTRUMENT_NAME", "TIMESTAMP", "HSEC", "PRICE", "UNITS", "BID_ASK_FLAG")
-col.classes = c(rep("character",4), "integer", "double", "integer", "character")
-inputformat <- make.input.format("csv", sep = ";",
-                                 col.names=col.names,
-                                 stringsAsFactors = FALSE)
+inputformat <- make.input.format("csv", sep = ";", stringsAsFactors = FALSE,
+                                 col.names=c("WKN", "ISIN", "INSTRUMENT_NAME", "TIMESTAMP", "HSEC", "PRICE", "UNITS", "BID_ASK_FLAG") )
 
-# input.path = "data/ticks_subsets/" # for debugging, small data set only
-input.path = "data/1017_01_M_08_E_20090331/"
-input.files = paste(input.path, list.files(path = input.path), sep="")
-
+rmr.options(backend="hadoop")
+files = hdfs.ls("Data_sub")[,6]
+files = files[grep(".*csv", files)]
+# files = files[1:1]
+hdfs.delete("/user/isresearch/output.csv")
+# hdfs.init()
 t1 = proc.time()
-data <- mapreduce(input=input.files,
-                  input.format=inputformat,
-                  map = map.ticks
-                  ,reduce = red.ticks
+
+data<- mapreduce(input=files
+                 ,input.format=inputformat
+                 ,output="user/isresearch/output.csv"
+                 ,output.format=make.output.format("csv", sep=";")
+                 ,map = map.ticks
+                 ,reduce = red.ticks
 )
-
-
-data.df <- from.dfs(data)
-View(data.df)
 t2 = proc.time()
+data.df = from.dfs(data, format=make.input.format("csv", sep=";"))
 
-print("time diff")
-print(t2-t1)
+# ensure correct formatting
+data.df$val[1] <- lapply(data.df$val[1], as.character)
+data.df$val[2] <- lapply(data.df$val[2], as.character)
+data.df$val[3:11] <- lapply(data.df$val[3:11], as.numeric)
 
-write.csv(data.df, "output.csv")
+paste("Time consumed by MapReduce: ", (t2-t1)[3], "s", sep="")
 
-tick.delta = data.df$val - 1.0
-tick.isin = data.df$key[, 1]
-tick.date = data.df$key[, 2]
+tick.isin = unlist(data.df$val[1])
+tick.date = unlist(data.df$val[2])
+tick.values = data.df$val[3:11]
+tick.delta =  tick.values - 1.0
 
 offset.seconds = c(0, 1, 5, 10, 30, 60, 60*5, 60*10, 60*60)
 offset.names = paste("+", offset.seconds, "s", sep="")
 # View(tick.delta)
-for (i in 1:length(data.df$key)) {
-  jpeg(paste("plots/", tick.isin[i], ".jpg", sep=""))
-  barplot(tick.delta[i,], 1:length(offset.names), names.arg=offset.names,
+for (i in 1:length(tick.date)) {
+  jpeg(paste("AxelPerschmann/plots/", tick.isin[i], ".jpg", sep=""))
+  barplot(unlist(tick.delta[i,]), 1:length(offset.names), names.arg=offset.names,
           ylab="BID price change in %", main = paste("ISIN:",tick.isin[i]),
-          sub=paste("adHocMessage from:", as.POSIXlt(tick.date[i], origin = "1970-01-01")),
+          # sub=paste("adHocMessage from:", as.POSIXlt(tick.date[i], origin = "1970-01-01")),
+          sub=paste("adHocMessage from:", tick.date[i]),
           ylim=c(-0.2,0.2))
   dev.off()
 }
-adhoc.count = dim(data.df$key)[1]
 
-jpeg("plots/summary.jpeg")
+adhoc.count = length(tick.date)
+jpeg("AxelPerschmann/plots/summary.jpeg")
 barplot(colSums(tick.delta != 0.) / adhoc.count * 100, 1:length(offset.names), names.arg=offset.names,
         ylab="% of stocks that show activity after an adHocMessage", main = "Trade activity after published adHoc message",
-        sub=paste("mean over", adhoc.count, "adhoc messages"), ylim=c(0,100))
+        sub=paste("mean over", adhoc.count, "adhoc messages"))
 dev.off()
-
-# # again, debug
-# barplot(colSums(tick.delta != 0.) / adhoc.count, 1:length(offset.names), names.arg=offset.names,
-#         ylab="% of stocks that show activity after an adHocMessage", main = "Trade activity after published adHoc message",
-#         sub=paste("mean over", adhoc.count, "adhoc messages"), ylim=c(0,1))

@@ -75,51 +75,21 @@ inputformat <- make.input.format("csv", sep = ";", stringsAsFactors = FALSE,
                                  col.names=c("WKN", "ISIN", "INSTRUMENT_NAME", "TIMESTAMP", "HSEC", "PRICE", "UNITS", "BID_ASK_FLAG") )
 
 rmr.options(backend="hadoop")
-files = hdfs.ls("Data_sub")[,6]
+files = hdfs.ls("Data")[,6]
 files = files[grep(".*csv", files)]
 # files = files[1:1]
-hdfs.delete("/user/isresearch/output.csv")
-# hdfs.init()
+# hdfs.delete("/user/isresearch/output.csv")
+
 t1 = proc.time()
 
 data<- mapreduce(input=files
                  ,input.format=inputformat
-                 ,output="user/isresearch/output.csv"
+                 ,output="/user/isresearch/output.csv"
                  ,output.format=make.output.format("csv", sep=";")
                  ,map = map.ticks
                  ,reduce = red.ticks
 )
 t2 = proc.time()
-data.df = from.dfs(data, format=make.input.format("csv", sep=";"))
+data.df = from.dfs("/user/isresearch/output.csv", format=make.input.format("csv", sep=";"))
 
-# ensure correct formatting
-data.df$val[1] <- lapply(data.df$val[1], as.character)
-data.df$val[2] <- lapply(data.df$val[2], as.character)
-data.df$val[3:11] <- lapply(data.df$val[3:11], as.numeric)
-
-paste("Time consumed by MapReduce: ", (t2-t1)[3], "s", sep="")
-
-tick.isin = unlist(data.df$val[1])
-tick.date = unlist(data.df$val[2])
-tick.values = data.df$val[3:11]
-tick.delta =  tick.values - 1.0
-
-offset.seconds = c(0, 1, 5, 10, 30, 60, 60*5, 60*10, 60*60)
-offset.names = paste("+", offset.seconds, "s", sep="")
-# View(tick.delta)
-for (i in 1:length(tick.date)) {
-  jpeg(paste("AxelPerschmann/plots/", tick.isin[i], ".jpg", sep=""))
-  barplot(unlist(tick.delta[i,]), 1:length(offset.names), names.arg=offset.names,
-          ylab="BID price change in %", main = paste("ISIN:",tick.isin[i]),
-          # sub=paste("adHocMessage from:", as.POSIXlt(tick.date[i], origin = "1970-01-01")),
-          sub=paste("adHocMessage from:", tick.date[i]),
-          ylim=c(-0.2,0.2))
-  dev.off()
-}
-
-adhoc.count = length(tick.date)
-jpeg("AxelPerschmann/plots/summary.jpeg")
-barplot(colSums(tick.delta != 0.) / adhoc.count * 100, 1:length(offset.names), names.arg=offset.names,
-        ylab="% of stocks that show activity after an adHocMessage", main = "Trade activity after published adHoc message",
-        sub=paste("mean over", adhoc.count, "adhoc messages"))
-dev.off()
+paste("Time consumed by MapReduce: ", (t2-t1)[3], "s (",  (t2-t1)[3]/60./60., "h)", sep="")

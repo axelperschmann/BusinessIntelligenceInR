@@ -22,7 +22,7 @@ for (name in input.names) {
   path.source = paste(getwd(), "/tmp/", source.name, sep="")
   path.dest = paste("/user/isresearch/Data/", source.name, sep="")
   # load to HDFS
-  hdfs.put(path.source, path.dest)
+  hdfs.put(src=path.source, dst=path.dest)
   
   # do not keep large unzipped file
   unlink(paste(getwd(), "/tmp", sep=""), recursive=TRUE)

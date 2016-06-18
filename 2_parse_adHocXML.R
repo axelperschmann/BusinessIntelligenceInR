@@ -1,3 +1,7 @@
+Sys.setenv(HADOOP_CMD="/usr/local/hadoop/bin/hadoop")
+library(rhdfs)
+hdfs.init()
+
 library(xml2)
 
 extract_dateAndISIN = function (message) {
@@ -86,7 +90,7 @@ extract_dateAndISIN = function (message) {
       if (date == "2005-10-12 16:52:41") {
         stop("debug")
       }
-
+      
       return(NULL)
       
       # Examples where this happens (file: DGAP_Ad-hoc_04_05.xml):
@@ -109,13 +113,8 @@ extract_dateAndISIN = function (message) {
 }
 
 # read xml file
-files = c("data/DGAP_Ad-hoc/DGAP_Ad-hoc_02-04.xml",
-          "data/DGAP_Ad-hoc/DGAP_Ad-hoc_04_05.xml",
-          "data/DGAP_Ad-hoc/DGAP_Ad-hoc_05-06.xml",
-          "data/DGAP_Ad-hoc/DGAP_Ad-hoc_06-07.xml",
-          "data/DGAP_Ad-hoc/DGAP_Ad-hoc_07_Aug10.xml",
-          "data/DGAP_Ad-hoc/DGAP_Ad-hoc_Apr11_Jun11.xml",
-          "data/DGAP_Ad-hoc/DGAP_Ad-hoc_Sep10_Apr11.xml")
+setwd("/home/isresearch/adHocMessages")
+files = list.files(path = ".", pattern=".*xml")
 
 events = c()
 for (f in files) {
@@ -137,5 +136,9 @@ ev = unique(data.frame(events))
 library(dplyr)
 ev = arrange(ev, isin, date)
 
+setwd("/home/isresearch/AxelPerschmann")
 write.csv(ev, file = "events.csv", row.names=FALSE)
+hdfs.put(src="events.csv", dest="/user/isresearch/events.csv")
+
+# clear R environment
 rm(list = ls())

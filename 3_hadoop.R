@@ -44,14 +44,14 @@ red.ticks <- function(k, v) {
   adhocs.relevant = adhocs.relevant[adhocs.relevant < tail(v$TIMESTAMP, n=1)]
   
   if (length(adhocs.relevant) > 0) {
-    # do magic stuff
+    # compute price deltas for fixed intervals
     l = length(adhocs.relevant)
     offset.seconds = c(0, 1, 5, 10, 30, 60, 60*5, 60*10, 60*60)
     timestamps = matrix(rep(adhocs.relevant,length(offset.seconds)), nrow=l)
     offset = matrix(rep(offset.seconds, l), byrow=TRUE, nrow=l)
     timestamps.future = timestamps + offset
     
-    fun = stepfun(v$TIMESTAMP, c(v$PRICE, tail(v$PRICE, n=1)), f=1, right=TRUE)
+    fun = stepfun(v$TIMESTAMP, c(v$PRICE, tail(v$PRICE, n=1)), f=0, right=TRUE)
     
     # collect corresponding PRICE for each TIMESTAMP
     result = c()

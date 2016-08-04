@@ -1,0 +1,61 @@
+This is BibTeX, Version 0.99d (TeX Live 2015)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: Seminar_AxelPerschmann_RHadoop.aux
+The style file: biblatex.bst
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Database file #1: Seminar_AxelPerschmann_RHadoop-blx.bib
+Database file #2: bib/literature.bib
+Biblatex version: 3.0
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated wiz_functions (elt_size=4) to 9000 items from 6000.
+You've used 15 entries,
+            6047 wiz_defined-function locations,
+            1226 strings with 10544 characters,
+and the built_in function-call counts, 39211 in all, are:
+= -- 1689
+> -- 1043
+< -- 469
++ -- 388
+- -- 316
+* -- 2142
+:= -- 2029
+add.period$ -- 0
+call.type$ -- 15
+change.case$ -- 267
+chr.to.int$ -- 40
+cite$ -- 28
+duplicate$ -- 4512
+empty$ -- 4479
+format.name$ -- 512
+if$ -- 9211
+int.to.chr$ -- 0
+int.to.str$ -- 36
+missing$ -- 0
+newline$ -- 275
+num.names$ -- 564
+pop$ -- 4512
+preamble$ -- 1
+purify$ -- 277
+quote$ -- 0
+skip$ -- 2426
+stack$ -- 0
+substring$ -- 1143
+swap$ -- 1450
+text.length$ -- 324
+text.prefix$ -- 14
+top$ -- 1
+type$ -- 558
+warning$ -- 0
+while$ -- 231
+width$ -- 0
+write$ -- 259

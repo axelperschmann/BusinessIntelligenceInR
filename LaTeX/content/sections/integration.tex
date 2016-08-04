@@ -1,0 +1,118 @@
+
+\chapter{Utilizing Hadoop from within R}
+\label{chap:integration}
+When analyzing big data, the capabilities of R and Hadoop fit together very well and should ideally be united. In the following, this paper describes how to utilize Hadoop from within the statistical software "R". 
+
+\section{RHadoop}
+The open source RHadoop project~\cite{rhadoop}, sponsored by Revolution Analytics, aims to give R programmers powerful tools to analyze data stored in Hadoop. RHadoop is a collection of five R packages as listed in \Cref{tab:rhadoop}.
+
+\begin{table}
+\begin{tabularx}{\textwidth{}}{|l|X|}\hline
+rhdfs & This package provides basic connectivity to the Hadoop Distributed File System. R programmers can browse, read, write, and modify files stored in HDFS from within R. Install this package only on the node that will run the R client.\\\hline
+rhbase & This package provides basic connectivity to the HBASE distributed database, using the Thrift server. R programmers can browse, read, write, and modify tables stored in HBASE, Hadoops distributed, scalable big data store database~\cite{HBase}. Install this package only on the node that will run the R client.\\\hline
+plyrmr & This package enables the R user to perform common data manipulation operations, as found in popular packages such as plyr and reshape2, on very large data sets stored on Hadoop. Like rmr, it relies on Hadoop MapReduce to perform its tasks, but it provides a familiar plyr-like interface while hiding many of the MapReduce details. Install this package only every node in the cluster.\\\hline
+rmr2 & A package that allows R developer to perform statistical analysis in R via Hadoop MapReduce functionality on a Hadoop cluster. Install this package on every node in the cluster.\\\hline
+ravro & A package that adds the ability to read and write avro files from local and HDFS file system and adds an avro input format for rmr2. Install this package only on the node that will run the R client.\\\hline
+  \end{tabularx}
+\caption{RHadoop is a colletion of five R packages~\cite{rhadoop}.}
+\label{tab:rhadoop}
+\end{table}
+
+The focus of this paper lies on the RHadoop packages \emph{rhdfs} and \emph{rmr2}, which allow R programmers to access the \ac{HDFS} and to perform statistical analysis in R via Hadoop MapReduce functionality on a Hadoop cluster. Detailed install instructions can be found on the projects website~\cite{rhadoop}.
+
+
+
+\section{rhdfs}
+Once \emph{rhdfs} is installed and the package is loaded, R programmers can browse, read, write and modify files stored in \ac{HDFS}. Amongst others the package offers functions for file manipulation (\texttt{hdfs.delete, hdfs.put, hdfs.get, \ldots{})}, read/write (\texttt{hdfs.file, hdfs.write, hdfs.seek, \ldots{}}) and utility (\texttt{hdfs.ls, hdfs.file.info, \ldots{}}). \\
+
+As a prerequisite the environment variable HADOOP\_CMD must point to the full path of the \emph{hadoop} binary and the package must be initialized via \lstinline!hdfs.init()!. The corresponding code to define an environment variable, load the rhdfs library and initialize its functionality is shown in \Cref{lst:rhdfsInit}.
+
+\begin{lstlisting}[breaklines=true, caption=Initialization of rhdfs., escapechar=|, label={lst:rhdfsInit}]
+Sys.setenv(HADOOP_CMD="/usr/local/hadoop/bin/hadoop")
+library(rhdfs)
+hdfs.init()
+\end{lstlisting}
+
+
+\Cref{lst:RObjSerialization} shows exemplary how any R object can be serialized to HDFS. \Cref{line:writeFile} establishes a write connection (\lstinline!"w"!) to a, possibly not yet existing, file called \lstinline!"my_smart_unique_name"!. The R object \lstinline!model! is serialized and written into this file in \Cref{line:writeFile}. Finally the connection to that file must be closed.
+\begin{lstlisting}[breaklines=true, caption=Serialization of an exemplary R object~\cite{rhadoop}., escapechar=|, label={lst:RObjSerialization}]
+model <- lm(...)
+modelfilename <- "my_smart_unique_name"
+modelfile <- hdfs.file(modelfilename, "w")|\label{line:createFile}|
+hdfs.write(model, modelfile)|\label{line:writeFile}|
+hdfs.close(modelfile)
+\end{lstlisting}
+
+In contrast \Cref{lst:RObjDeserialization} shows the deserialization of an HDFS file to a R object. Here, a read connection (\lstinline!"r"!) to the desired \ac{HDFS} file is established to load its content into the R environment. Subsequently the retrieved content must be unserialized (\Cref{line:unserialize}) and again the connection must be closed.
+\begin{lstlisting}[breaklines=true, caption=Deserialization of an exemplary R object~\cite{rhadoop}., escapechar=|, label={lst:RObjDeserialization}]
+modelfile = hdfs.file(modelfilename, "r")
+m <- hdfs.read(modelfile)
+model <- unserialize(m)|\label{line:unserialize}|
+hdfs.close(modelfile)
+\end{lstlisting}
+
+
+
+\section{rmr2}\label{sec:rmr2}
+With the help of \emph{rmr2} programmers can utilize the Hadoop MapReduce functionality from within R to perform statistical analysis on huge data sets on a parallel basis.\\
+
+Similar as for \emph{rhdfs} it is necessary to set the environment variables HADOOP\_CMD and HADOOP\_STREAMING, the latter one pointing to the Hadoop Streaming Java\footnote{Apache Hadoop is implemented in Java} Library. An example initialization is show in \Cref{lst:rmr2Init}.
+\begin{lstlisting}[breaklines=true, caption=Initialization of the rmr2 package., escapechar=|, label={lst:rmr2Init}]
+Sys.setenv(HADOOP_CMD="/usr/local/hadoop/bin/hadoop")
+Sys.setenv(HADOOP_STREAMING
+              ="/usr/local/hadoop/share/hadoop/tools/lib/hadoop-streaming-2.4.1.jar")
+library(rmr2)
+rmr.options(backend="hadoop")|\label{line:backend}|
+\end{lstlisting}
+
+Via \lstinline!rmr.options()! it is possible to switch between the distributed Hadoop backend (see \Cref{line:backend}) and a non-distributed local backend. With \lstinline!backend="local"! rmr2 jobs run single threaded on the local interpreter which helps a lot when debugging. By default, all nodes will receive a copy of the global R environment, \ie they can read previously initialized variables. To reduce transfer costs the option \lstinline!rmr.options(exclude.objects=NULL)! can exclude certain objects from this practice.\\
+
+The most important function provided by rmr2 is \lstinline!mapreduce()!. \Cref{lst:structMapReduce} shows the functions signature as documented in the R documentation. The function defines and runs a MapReduce job on a given input (either an object or a valid path string). Various parameters allow an individual fine tuning of the MapReduce job. \Eg:
+
+\begin{description}
+\item[input] Paths to the input folder(s) or the return value of another mapreduce or a \lstinline!to.dfs!\footnote{\texttt{to.dfs()} and \texttt{from.dfs()} allow to move data from RAM to HDFS and back.  \cite[R help of rmr2,][]{rhadoop}} call.
+\item[input.format] \lstinline!= make.input.format("csv", sep = ";")! defines the format and structure of the input file(s).
+\item[output] defines the destination path in the HDFS. If absent, \lstinline!mapreduce()! returns a \texttt{big.data.object}\footnote{A \texttt{big.data.object} references a data set stored in the HDFS. As such even huge data sets that exceed the nodes memory can be manipulated by other rhadoop functions. \cite[R help of rmr2,][]{rhadoop}}, otherwise it returns the \ac{HDFS} filepath.
+\item[map] an R function of two arguments specifying the map phase. It either returns \lstinline!NULL! or a collection of key-value pairs.
+\item[reduce] an R function which takes as an input the key-value pairs generated by the preceding map phase grouped by key.
+\end{description}
+
+\begin{lstlisting}[breaklines=true, caption=function signature of \lstinline!mapreduce()! as described in the rmr2 help (\lstinline!?mapreduce!)., escapechar=|, label={lst:structMapReduce}]
+mapreduce(
+  input,
+  output = NULL,
+  map = to.map(identity),
+  reduce = NULL,
+  vectorized.reduce = FALSE,
+  combine = NULL,
+  in.memory.combine = FALSE,
+  input.format = "native",
+  output.format = "native",
+  backend.parameters = list(),
+  verbose = TRUE) 
+\end{lstlisting}
+
+
+\section{Word Count Example}\label{chap:helloWorld}
+\Cref{lst:helloWorld} shows a simple "Hello World!" example for a MapReduce job~\cite{usingRAndHadoop}. The jobs intend is to return the number of word occurrences within a given input text file. The input file \texttt{loremipsum.txt} contains 100 words of dummy text and as such \lstinline!input.format! is simply \lstinline!"text"!.
+
+Our map function, defined in \Cref{line:mapFunc}, reads the input line by line and splits each line into individual words. Using the individual words as key and integer one as a counter variable, it produces corresponding key-value pairs. In the next phase, the mapper function, defined in \Cref{line:redFunc}, receives the grouped key-values and simply outputs the sum over all counter 'ones' for each key. In \Cref{line:fromDFS} the final result is moved into the R environment and can be viewed or further processed.
+
+\begin{lstlisting}[breaklines=true, caption=Hello World example for MapReduce~\cite{usingRAndHadoop}., escapechar=|, label={lst:helloWorld}]
+library(rmr2)
+rmr.options(backend = "local")
+data <- mapreduce(input = "loremipsum.txt", 
+                  input.format = "text",
+                  map = function(.,lines){|\label{line:mapFunc}|
+                    keyval(key = unlist(strsplit(lines, split = " ")),
+                           val = 1) },
+                  reduce = function(word, counts){|\label{line:redFunc}|
+                    keyval(key = word,
+                           val = sum(counts)) }
+)
+result = from.dfs(data)|\label{line:fromDFS}|
+result$key
+ [1] "Lorem"      "ipsum"      "dolor"      "sit"        "amet,"      "consetetur"  ...
+result$val
+ [1] 4 4 4 4 2 2 2 2 4 4 2 2 2 2 2 2 8 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
+\end{lstlisting}

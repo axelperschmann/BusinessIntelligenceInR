@@ -1,0 +1,33 @@
+
+\boolfalse {citerequest}\boolfalse {citetracker}\boolfalse {pagetracker}\boolfalse {backtracker}\relax 
+\defcounter {refsection}{0}\relax 
+\select@language {english}
+\contentsline {section}{\numberline {1}Motivation}{1}{section*.2}
+\contentsline {section}{\numberline {2}Background}{1}{section*.3}
+\contentsline {subsection}{\numberline {2.1}R}{1}{section*.4}
+\contentsline {subsubsection}{\numberline {2.1.1}RStudio}{2}{section*.6}
+\contentsline {subsection}{\numberline {2.2}Hadoop}{2}{section*.7}
+\contentsline {subsubsection}{\numberline {2.2.1}Hadoop Distributed File System (HDFS)}{3}{section*.11}
+\contentsline {subsubsection}{\numberline {2.2.2}Hadoop MapReduce}{3}{section*.14}
+\contentsline {subsubsection}{\numberline {2.2.3}Hadoop Streaming}{4}{section*.16}
+\contentsline {section}{\numberline {3}Utilizing Hadoop from within R}{4}{section*.17}
+\contentsline {subsection}{\numberline {3.1}RHadoop}{4}{section*.18}
+\contentsline {subsection}{\numberline {3.2}rhdfs}{5}{section*.19}
+\contentsline {subsection}{\numberline {3.3}rmr2}{6}{section*.20}
+\contentsline {subsection}{\numberline {3.4}Word Count Example}{7}{section*.21}
+\contentsline {section}{\numberline {4}Real World Example: Stock Exchange Data}{8}{section*.22}
+\contentsline {subsection}{\numberline {4.1}Input Data}{8}{section*.23}
+\contentsline {subsubsection}{\numberline {4.1.1}Stock exchange data from the Deutsche B\"orse}{8}{section*.24}
+\contentsline {subsubsection}{\numberline {4.1.2}Ad~hoc messages}{10}{section*.28}
+\contentsline {subsection}{\numberline {4.2}MapReduce Job}{11}{section*.29}
+\contentsline {subsubsection}{\numberline {4.2.1}Map() function}{11}{section*.30}
+\contentsline {subsubsection}{\numberline {4.2.2}Reduce() function}{12}{section*.31}
+\contentsline {subsubsection}{\numberline {4.2.3}MapReduce job call}{13}{section*.32}
+\contentsline {subsection}{\numberline {4.3}Evaluation}{13}{section*.33}
+\contentsline {section}{\numberline {5}Conclusion}{14}{section*.36}
+\save@tocdepth \setcounter {tocdepth}{1}
+\contentsline {section}{\numberline {A}Glossary}{ii}{section*.37}
+\contentsline {section}{\numberline {B}References}{ii}{section*.38}
+\contentsline {section}{\numberline {C}List of Figures}{iii}{section*.39}
+\contentsline {section}{\numberline {D}List of Tables}{iii}{section*.40}
+\contentsline {section}{\numberline {E}Listings}{iii}{section*.41}

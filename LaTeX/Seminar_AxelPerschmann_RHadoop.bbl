@@ -1,0 +1,276 @@
+% $ biblatex auxiliary file $
+% $ biblatex version 2.5 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated as
+% required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+\entry{usingRAndHadoop}{misc}{}
+  \name{author}{1}{}{%
+    {{}%
+     {{Antonio Piccolbo}}{A.}%
+     {}{}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{A1}
+  \strng{fullhash}{A1}
+  \field{sortinit}{A}
+  \field{howpublished}{\url{http://strataconf.com/stratany2013/public/schedule/detail/30632}}
+  \field{note}{[Online; accessed 11-June-2016]}
+  \field{title}{{Using R and Hadoop for Statistical Computation at Scale}}
+\endentry
+
+\entry{HADOOP}{misc}{}
+  \field{sortinit}{A}
+  \field{howpublished}{\url{https://hadoop.apache.org}}
+  \field{title}{{Apache Hadoop}}
+\endentry
+
+\entry{googleMapReduce}{inproceedings}{}
+  \name{author}{2}{}{%
+    {{}%
+     {Dean}{D.}%
+     {Jeffrey}{J.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Ghemawat}{G.}%
+     {Sanjay}{S.}%
+     {}{}%
+     {}{}}%
+  }
+  \list{publisher}{1}{%
+    {USENIX Association}%
+  }
+  \strng{namehash}{DJGS1}
+  \strng{fullhash}{DJGS1}
+  \field{sortinit}{D}
+  \field{booktitle}{Proceedings of the 6th Conference on Symposium on Opearting
+  Systems Design \& Implementation - Volume 6}
+  \field{pages}{10\bibrangedash 10}
+  \field{series}{OSDI'04}
+  \field{title}{MapReduce: Simplified Data Processing on Large Clusters}
+  \verb{url}
+  \verb http://dl.acm.org/citation.cfm?id=1251254.1251264
+  \endverb
+  \list{location}{1}{%
+    {San Francisco, CA}%
+  }
+  \field{year}{2004}
+  \warn{\item Can't use 'location' + 'address'}
+\endentry
+
+\entry{GFS}{article}{}
+  \name{author}{3}{}{%
+    {{}%
+     {Ghemawat}{G.}%
+     {Sanjay}{S.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Gobioff}{G.}%
+     {Howard}{H.}%
+     {}{}%
+     {}{}}%
+    {{}%
+     {Leung}{L.}%
+     {Shun-Tak}{S.-T.}%
+     {}{}%
+     {}{}}%
+  }
+  \list{publisher}{1}{%
+    {ACM}%
+  }
+  \keyw{clustered storage, data storage, fault tolerance, scalability}
+  \strng{namehash}{GSGHLST1}
+  \strng{fullhash}{GSGHLST1}
+  \field{sortinit}{G}
+  \verb{doi}
+  \verb 10.1145/1165389.945450
+  \endverb
+  \field{issn}{0163-5980}
+  \field{number}{5}
+  \field{pages}{29\bibrangedash 43}
+  \field{title}{The Google File System}
+  \verb{url}
+  \verb http://doi.acm.org/10.1145/1165389.945450
+  \endverb
+  \field{volume}{37}
+  \list{location}{1}{%
+    {New York, NY, USA}%
+  }
+  \field{journaltitle}{SIGOPS Oper. Syst. Rev.}
+  \field{month}{10}
+  \field{year}{2003}
+\endentry
+
+\entry{lockwood}{misc}{}
+  \field{sortinit}{G}
+  \field{howpublished}{\url{http://www.glennklockwood.com/data-intensive/hadoop/overview.html}}
+  \field{note}{[Online; accessed 08-June-2016]}
+  \field{title}{{Glenn K Lockwood}}
+\endentry
+
+\entry{HadoopStreaming}{misc}{}
+  \field{sortinit}{H}
+  \field{howpublished}{\url{https://hadoop.apache.org/docs/r1.2.1/streaming.html}}
+  \field{title}{{Hadoop Streaming}}
+\endentry
+
+\entry{GitHubAxelPerschmann}{misc}{}
+  \name{author}{1}{}{%
+    {{}%
+     {Perschmann}{P.}%
+     {Axel}{A.}%
+     {}{}%
+     {}{}}%
+  }
+  \list{publisher}{1}{%
+    {GitHub}%
+  }
+  \strng{namehash}{PA1}
+  \strng{fullhash}{PA1}
+  \field{sortinit}{P}
+  \field{howpublished}{\url{https://github.com/axelperschmann/BusinessIntelligenceInR}}
+  \field{title}{Business Intelligence in R}
+  \field{journaltitle}{GitHub repository}
+  \field{year}{2016}
+\endentry
+
+\entry{RLanguage}{manual}{}
+  \name{author}{1}{}{%
+    {{}%
+     {{R Development Core Team}}{R.}%
+     {}{}%
+     {}{}%
+     {}{}}%
+  }
+  \list{organization}{1}{%
+    {R Foundation for Statistical Computing}%
+  }
+  \strng{namehash}{R1}
+  \strng{fullhash}{R1}
+  \field{sortinit}{R}
+  \field{isbn}{3-900051-07-0}
+  \field{note}{Available online at \url{www.R-project.org}}
+  \field{title}{R: A Language and Environment for Statistical Computing}
+  \list{location}{1}{%
+    {Vienna, Austria}%
+  }
+  \field{year}{2008}
+\endentry
+
+\entry{rhadoop}{misc}{}
+  \field{sortinit}{R}
+  \field{howpublished}{\url{https://github.com/RevolutionAnalytics/RHadoop/wiki}}
+  \field{note}{[Online; accessed 09-June-2016]}
+  \field{title}{{RevolutionAnalytics - RHadoop Project}}
+\endentry
+
+\entry{RStudio}{manual}{}
+  \name{author}{1}{}{%
+    {{}%
+     {{RStudio Team}}{R.}%
+     {}{}%
+     {}{}%
+     {}{}}%
+  }
+  \list{organization}{1}{%
+    {RStudio, Inc.}%
+  }
+  \strng{namehash}{R2}
+  \strng{fullhash}{R2}
+  \field{sortinit}{R}
+  \field{title}{RStudio: Integrated Development Environment for R}
+  \verb{url}
+  \verb http://www.rstudio.com/
+  \endverb
+  \list{location}{1}{%
+    {Boston, MA}%
+  }
+  \field{year}{2015}
+\endentry
+
+\entry{HBase}{misc}{}
+  \name{author}{1}{}{%
+    {{}%
+     {{The Apache Software Foundation}}{T.}%
+     {}{}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{T1}
+  \strng{fullhash}{T1}
+  \field{sortinit}{T}
+  \field{howpublished}{\url{http://hbase.apache.org}}
+  \field{note}{[Online; accessed 15-June-2016]}
+  \field{title}{Welcome to HBase!}
+  \field{year}{2010}
+\endentry
+
+\entry{CRAN}{misc}{}
+  \field{sortinit}{T}
+  \field{howpublished}{\url{https://cran.r-project.org/web/packages}}
+  \field{note}{[Online; accessed 08-June-2016]}
+  \field{title}{{The Comprehensive R Archive Network}}
+\endentry
+
+\entry{rPackages}{book}{}
+  \name{author}{1}{}{%
+    {{}%
+     {Wickham}{W.}%
+     {Hadley}{H.}%
+     {}{}%
+     {}{}}%
+  }
+  \list{publisher}{1}{%
+    {O'Reilly Media}%
+  }
+  \strng{namehash}{WH1}
+  \strng{fullhash}{WH1}
+  \field{sortinit}{W}
+  \field{isbn}{1491910593}
+  \field{title}{R Packages}
+  \verb{url}
+  \verb http://www.amazon.com/R-Packages-Hadley-Wickham/dp/1491910593%3FSubscri
+  \verb ptionId%3D0JYN1NVW651KCA56C102%26tag%3Dtechkie-20%26linkCode%3Dxm2%26ca
+  \verb mp%3D2025%26creative%3D165953%26creativeASIN%3D1491910593
+  \endverb
+  \list{location}{1}{%
+    {Sebastopol, CA}%
+  }
+  \field{year}{2015}
+\endentry
+
+\entry{xetra}{misc}{}
+  \name{author}{1}{}{%
+    {{}%
+     {{Xetra}}{X.}%
+     {}{}%
+     {}{}%
+     {}{}}%
+  }
+  \strng{namehash}{X1}
+  \strng{fullhash}{X1}
+  \field{sortinit}{X}
+  \field{howpublished}{\url{http://www.xetra.com/xetra-en/trading/trading-information/trading-hours}}
+  \field{note}{[Online; accessed 18-June-2016]}
+  \field{title}{Xetra Trading hours}
+\endentry
+
+\lossort
+\endlossort
+
+\endinput

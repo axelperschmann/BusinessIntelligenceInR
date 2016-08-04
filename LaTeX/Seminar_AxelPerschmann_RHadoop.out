@@ -1,0 +1,20 @@
+\BOOKMARK [1][-]{TOC.1}{Contents}{}% 1
+\BOOKMARK [1][-]{section*.2}{1 Motivation}{}% 2
+\BOOKMARK [1][-]{section*.3}{2 Background}{}% 3
+\BOOKMARK [2][-]{section*.4}{2.1 R}{section*.3}% 4
+\BOOKMARK [2][-]{section*.7}{2.2 Hadoop}{section*.3}% 5
+\BOOKMARK [1][-]{section*.17}{3 Utilizing Hadoop from within R}{}% 6
+\BOOKMARK [2][-]{section*.18}{3.1 RHadoop}{section*.17}% 7
+\BOOKMARK [2][-]{section*.19}{3.2 rhdfs}{section*.17}% 8
+\BOOKMARK [2][-]{section*.20}{3.3 rmr2}{section*.17}% 9
+\BOOKMARK [2][-]{section*.21}{3.4 Word Count Example}{section*.17}% 10
+\BOOKMARK [1][-]{section*.22}{4 Real World Example: Stock Exchange Data}{}% 11
+\BOOKMARK [2][-]{section*.23}{4.1 Input Data}{section*.22}% 12
+\BOOKMARK [2][-]{section*.29}{4.2 MapReduce Job}{section*.22}% 13
+\BOOKMARK [2][-]{section*.33}{4.3 Evaluation}{section*.22}% 14
+\BOOKMARK [1][-]{section*.36}{5 Conclusion}{}% 15
+\BOOKMARK [1][-]{section*.37}{A Glossary}{}% 16
+\BOOKMARK [1][-]{section*.38}{B References}{}% 17
+\BOOKMARK [1][-]{section*.39}{C List of Figures}{}% 18
+\BOOKMARK [1][-]{section*.40}{D List of Tables}{}% 19
+\BOOKMARK [1][-]{section*.41}{E Listings}{}% 20
